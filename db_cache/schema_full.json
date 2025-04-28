@@ -1,0 +1,1501 @@
+{
+  "auth_user": {
+    "description":"Manages user accounts in the HR application, storing usernames, hashed passwords, email addresses, and roles (superuser, staff, active status). Tracks login and account creation timestamps, enabling authentication, authorization, permission management, and secure access to recruitment tools, user assignments, and action tracking.",
+    "columns": {
+      "id": "INTEGER",
+      "password": "VARCHAR(128)",
+      "last_login": "TIMESTAMP",
+      "is_superuser": "BOOLEAN",
+      "username": "VARCHAR(150)",
+      "first_name": "VARCHAR(30)",
+      "last_name": "VARCHAR(30)",
+      "email": "VARCHAR(254)",
+      "is_staff": "BOOLEAN",
+      "is_active": "BOOLEAN",
+      "date_joined": "TIMESTAMP"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": []
+  },
+  "consultancy_consultancy": {
+    "description":"Stores external consultancy details for HR management, including names, creation emails, lock status, and sourcing team affiliations. Tracks creation and modification timestamps, enabling coordination of outsourced recruitment, consultancy relationship management, and monitoring of external hiring contributions.",
+    "columns": {
+      "id": "UUID",
+      "name": "VARCHAR(64)",
+      "created_by_email": "VARCHAR(254)",
+      "is_locked": "INTEGER",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "sourcing_for_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "sourcing_for_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "consultancy_consultant": {
+    "description":"Holds profiles of individual consultants with their emails and links to their parent consultancies, along with timestamps for creation and modification. It is essential for identifying and contacting consultants, facilitating collaboration with external recruiters, and is applied in consultancy-driven recruitment to manage consultant interactions.",
+    "columns": {
+      "id": "UUID",
+      "email": "VARCHAR(254)",
+      "modified_at": "TIMESTAMP",
+      "created_at": "TIMESTAMP",
+      "consultancy_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "consultancy_id",
+        "references": {
+          "table": "consultancy_consultancy",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "consultancy_outsourcedjob": {
+    "description":"Links outsourced jobs to consultancies, storing job IDs, consultancy IDs, and validity dates to track assignment expirations. Facilitates management of external job postings, consultancy recruitment responsibilities, and alignment with organizational hiring needs.",
+    "columns": {
+      "id": "UUID",
+      "modified_at": "TIMESTAMP",
+      "created_at": "TIMESTAMP",
+      "consultancy_id": "UUID",
+      "job_id": "UUID",
+      "valid_till": "DATE"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "consultancy_id",
+        "references": {
+          "table": "consultancy_consultancy",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "employee_employee": {
+    "description":"Stores employee profiles for HR management, including employee IDs, designations, departments, locations, preferred locations, reporting managers, and business units. Supports JSONB fields for custom data and resume storage, enabling recruitment, onboarding, team organization, workforce analytics, and employee tracking.",
+    "columns": {
+      "id": "UUID",
+      "employee_id": "VARCHAR(30)",
+      "location": "VARCHAR(128)",
+      "preferred_locations": "VARCHAR(128)",
+      "designation": "VARCHAR(128)",
+      "department": "VARCHAR(128)",
+      "other_fields": "JSONB",
+      "modified_at": "TIMESTAMP",
+      "created_at": "TIMESTAMP",
+      "business_unit_id": "UUID",
+      "reporting_manager_id": "UUID",
+      "team_member_id": "UUID",
+      "mail_subscription": "JSONB",
+      "resume": "VARCHAR(256)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "business_unit_id",
+        "references": {
+          "table": "param_auth_businessunit",
+          "column": "id"
+        }
+      },
+      {
+        "column": "reporting_manager_id",
+        "references": {
+          "table": "param_auth_teammember",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_member_id",
+        "references": {
+          "table": "param_auth_teammember",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "interview_kit_interviewsession": {
+    "description":"Manages interview sessions in the recruitment pipeline, storing start/end times, locations, recruiter notes, JSONB interviewer feedback, and links to candidates, jobs, and team members. Tracks cancellation status, notifications, and interview URLs, enabling scheduling, candidate progress monitoring, and feedback collection for hiring coordination.",
+    "columns": {
+      "id": "UUID",
+      "start_time": "TIMESTAMP",
+      "end_time": "TIMESTAMP",
+      "recruiter_notes": "TEXT",
+      "interview_location": "VARCHAR(512)",
+      "interviewer_feedback": "JSONB",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "application_stage_id": "INTEGER",
+      "candidate_id": "UUID",
+      "created_by_id": "INTEGER",
+      "interviewer_id": "INTEGER",
+      "job_id": "UUID",
+      "team_id": "UUID",
+      "candidate_timezone": "VARCHAR(64)",
+      "event_id": "VARCHAR(44)",
+      "is_cancelled": "BOOLEAN",
+      "interviewer_confirmation": "JSONB",
+      "other_fields": "JSONB",
+      "stage": "VARCHAR(20)",
+      "candidate_notified_at": "TIMESTAMP",
+      "is_candidate_notified": "BOOLEAN",
+      "interview_url": "TEXT",
+      "interview_url_type": "VARCHAR(30)",
+      "is_quick_interview": "BOOLEAN"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "application_stage_id",
+        "references": {
+          "table": "sourcing_applicationstatus",
+          "column": "id"
+        }
+      },
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "created_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "interviewer_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "offer_manager_offermasterdata": {
+    "description":"Stores job offer details for candidates, including JSONB data with salary components (basic, HRA, LTA, PF, gratuity), job designation, department, location, and recruiter information. Links to candidates and jobs, enabling offer management, compensation tracking, and recruitment finalization.",
+    "columns": {
+      "id": "UUID",
+      "data_json": "JSONB",
+      "candidate_id": "UUID",
+      "job_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_auth_businessunit": {
+    "description":"Defines business units with names, ERP codes, and links to teams and organizations, tracking creation and modification timestamps. Supports categorization of jobs and recruitment by business unit, enabling targeted hiring strategies and alignment with organizational structures.",
+    "columns": {
+      "id": "UUID",
+      "name": "VARCHAR(128)",
+      "modified_at": "TIMESTAMP",
+      "created_at": "TIMESTAMP",
+      "team_id": "UUID",
+      "organization_id": "UUID",
+      "erp_code": "VARCHAR(128)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "organization_id",
+        "references": {
+          "table": "param_auth_organization",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_auth_organization": {
+    "description":"Stores top-level organization details, including names, ERP codes, and team associations, with creation and modification timestamps. Enables management of organizational hierarchies, supports multi-entity recruitment context, and aligns HR operations with team and entity structures.",
+    "columns": {
+      "id": "UUID",
+      "name": "VARCHAR(128)",
+      "modified_at": "TIMESTAMP",
+      "created_at": "TIMESTAMP",
+      "team_id": "UUID",
+      "erp_code": "VARCHAR(128)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_auth_team": {
+    "description":"Defines recruitment teams with company names, logos, JSONB configurations, and authentication settings (Okta, SAML, MFA). Includes team types, career page settings, and integration details, enabling team-based HR workflows, branding, and secure recruitment coordination.",
+    "columns": {
+      "id": "UUID",
+      "company_name": "VARCHAR(128)",
+      "company_logo": "VARCHAR(100)",
+      "career_banner": "VARCHAR(100)",
+      "company_details": "JSONB",
+      "is_okta": "BOOLEAN",
+      "saml_metadata_url": "VARCHAR(200)",
+      "greenhouse_token": "VARCHAR(50)",
+      "sub_domain": "VARCHAR(64)",
+      "modified_at": "TIMESTAMP",
+      "created_at": "TIMESTAMP",
+      "created_by_id": "INTEGER",
+      "team_type": "VARCHAR(20)",
+      "has_caf_auto_trigger": "BOOLEAN",
+      "timezone": "VARCHAR(64)",
+      "configuration": "JSONB",
+      "email_domain": "JSONB",
+      "is_candidate_portal_enabled": "BOOLEAN",
+      "career_page_custom_css": "VARCHAR(2500)",
+      "career_page_links": "JSONB",
+      "recruitment_logo": "VARCHAR(100)",
+      "is_password_auth_required": "BOOLEAN",
+      "login_scheme": "VARCHAR(2)",
+      "saml_configuration": "JSONB",
+      "is_gsuite_integrated": "BOOLEAN",
+      "plan_id": "INTEGER",
+      "slots": "INTEGER",
+      "trail_start_date": "DATE",
+      "trial_end_date": "DATE",
+      "has_mfa": "BOOLEAN"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "created_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_auth_teammember": {
+    "description":"Assigns team members with roles, statuses, and JSONB configurations for onboarding and activities, linking to teams and users. Manages recruitment permissions, tracks member involvement, and supports collaboration and onboarding in HR workflows.",
+    "columns": {
+      "id": "UUID",
+      "role": "VARCHAR(128)",
+      "status": "VARCHAR(128)",
+      "invited_by_id": "INTEGER",
+      "member_id": "INTEGER",
+      "team_id": "UUID",
+      "daily_mail_subscription": "BOOLEAN",
+      "timezone": "VARCHAR(64)",
+      "is_email_verified": "BOOLEAN",
+      "onboarding_steps": "JSONB",
+      "email_signature": "VARCHAR(512)",
+      "configurations": "JSONB",
+      "activity_data": "JSONB",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "invited_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "member_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_entitycustomfields": {
+    "description":"Stores custom field values for entities (e.g., jobs, candidates) with text data, entity types, and links to users and teams, tracking creation and modification. Enhances recruitment flexibility by enabling tailored data collection and custom attributes for HR processes",
+    "columns": {
+      "id": "UUID",
+      "value": "TEXT",
+      "entity_id": "UUID",
+      "entity_type": "INTEGER",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "created_by_id": "INTEGER",
+      "field_id": "UUID",
+      "modified_by_id": "INTEGER",
+      "team_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "created_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "field_id",
+        "references": {
+          "table": "param_forms_standardapplicationformfield",
+          "column": "id"
+        }
+      },
+      {
+        "column": "modified_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_formquestion": {
+    "description":"Stores form questions with text values, repeatability flags, and field types, linking to jobs, sections, teams, and templates. Enables dynamic application form creation, targeted candidate data collection, and customized recruitment question design.",
+    "columns": {
+      "id": "UUID",
+      "value": "TEXT",
+      "repeatable": "BOOLEAN",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "job_id": "UUID",
+      "section_id": "UUID",
+      "team_id": "UUID",
+      "template_id": "UUID",
+      "field_type_key": "VARCHAR(50)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "section_id",
+        "references": {
+          "table": "param_forms_formsection",
+          "column": "id"
+        }
+      },
+      {
+        "column": "template_id",
+        "references": {
+          "table": "param_forms_formtemplate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_formresponse": {
+    "description":"Captures candidate form responses with text values, sequences, and dropdown options, linking to applications, candidates, jobs, questions, and teams. Supports structured evaluation of applicant answers, form submission processing, and recruitment data analysis.",
+    "columns": {
+      "id": "UUID",
+      "value": "TEXT",
+      "sequence": "INTEGER",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "application_id": "INTEGER",
+      "candidate_id": "UUID",
+      "form_id": "UUID",
+      "job_id": "UUID",
+      "question_id": "UUID",
+      "section_id": "UUID",
+      "team_id": "UUID",
+      "template_id": "UUID",
+      "dropdown_val": "TEXT",
+      "field_type_key": "VARCHAR(50)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "application_id",
+        "references": {
+          "table": "sourcing_application",
+          "column": "id"
+        }
+      },
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "form_id",
+        "references": {
+          "table": "param_forms_formshare",
+          "column": "id"
+        }
+      },
+      {
+        "column": "question_id",
+        "references": {
+          "table": "param_forms_formquestion",
+          "column": "id"
+        }
+      },
+      {
+        "column": "section_id",
+        "references": {
+          "table": "param_forms_formsection",
+          "column": "id"
+        }
+      },
+      {
+        "column": "template_id",
+        "references": {
+          "table": "param_forms_formtemplate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_formreviewer": {
+    "description":"Assigns reviewers to form submissions with statuses (e.g., pending, invited) and comments, linking to form shares, team members, and teams. Facilitates organized candidate evaluation, feedback coordination, and thorough review of application responses in recruitment.",
+    "columns": {
+      "id": "UUID",
+      "status": "VARCHAR(50)",
+      "comment": "VARCHAR(256)",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "form_share_id": "UUID",
+      "reviewer_id": "UUID",
+      "team_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "form_share_id",
+        "references": {
+          "table": "param_forms_formshare",
+          "column": "id"
+        }
+      },
+      {
+        "column": "reviewer_id",
+        "references": {
+          "table": "param_auth_teammember",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_formsection": {
+    "description":"Organizes form sections with text values, linking to jobs, teams, and templates, with creation and modification timestamps. Structures application forms into logical sections, enhancing data collection and recruitment form layout design.",
+    "columns": {
+      "id": "UUID",
+      "value": "TEXT",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "job_id": "UUID",
+      "team_id": "UUID",
+      "template_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "template_id",
+        "references": {
+          "table": "param_forms_formtemplate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_formshare": {
+    "description":"Tracks form sharing with candidates, storing JSONB responses, validity dates, and links to candidates, jobs, and creators. Manages form distribution, ensures candidate completion, and facilitates application workflows in recruitment.",
+    "columns": {
+      "id": "UUID",
+      "response": "JSONB",
+      "validity": "DATE",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "candidate_id": "UUID",
+      "created_by_id": "INTEGER",
+      "form_id": "UUID",
+      "job_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "form_id",
+        "references": {
+          "table": "param_forms_formtemplate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "created_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_formtemplate": {
+    "description":"Defines reusable form templates with names, JSONB sections, rules, and reviewer settings, linked to teams and creators. Standardizes candidate data collection, streamlines application processes, and supports consistent recruitment form management.",
+    "columns": {
+      "id": "UUID",
+      "name": "VARCHAR(50)",
+      "description": "VARCHAR(128)",
+      "sections": "JSONB",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "created_by_id": "INTEGER",
+      "team_id": "UUID",
+      "form_type": "VARCHAR(50)",
+      "is_enabled": "BOOLEAN",
+      "is_default": "BOOLEAN",
+      "rules": "JSONB",
+      "sections_backup": "JSONB",
+      "reviewer_action_id": "UUID",
+      "reviewer_action_set_id": "UUID",
+      "status": "VARCHAR(50)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "reviewer_action_id",
+        "references": {
+          "table": "param_common_revieweraction",
+          "column": "id"
+        }
+      },
+      {
+        "column": "reviewer_action_set_id",
+        "references": {
+          "table": "param_common_revieweractionset",
+          "column": "id"
+        }
+      },
+      {
+        "column": "created_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_standardapplicationformfield": {
+    "description":"Specifies application form fields with titles, types (e.g., text, number), and properties (required, editable), linked to sections and teams. Enables customized form design, targeted candidate data capture, and tailored input fields for recruitment.",
+    "columns": {
+      "id": "UUID",
+      "title": "VARCHAR(1024)",
+      "field_type_key": "VARCHAR(50)",
+      "answer_type": "VARCHAR(25)",
+      "is_default": "BOOLEAN",
+      "is_required": "BOOLEAN",
+      "is_NA_enabled": "BOOLEAN",
+      "added_by_email": "VARCHAR(128)",
+      "api_url": "VARCHAR(1000)",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "section_id": "VARCHAR(36)",
+      "team_id": "UUID",
+      "priority": "INTEGER",
+      "drop_down_id": "UUID",
+      "entity_type": "INTEGER",
+      "is_editable": "BOOLEAN",
+      "is_enabled": "BOOLEAN",
+      "is_private": "BOOLEAN",
+      "placeholder": "VARCHAR(50)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "drop_down_id",
+        "references": {
+          "table": "param_common_dropdown",
+          "column": "id"
+        }
+      },
+      {
+        "column": "section_id",
+        "references": {
+          "table": "param_forms_standardapplicationformsection",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "param_forms_standardapplicationformsection": {
+    "description":"Organizes standard form sections with titles, types, and priorities, linked to teams. Groups related fields for consistent application templates, enhancing form usability and recruitment data organization.",
+    "columns": {
+      "id": "VARCHAR(36)",
+      "title": "VARCHAR(2048)",
+      "type": "VARCHAR(100)",
+      "description": "VARCHAR(2048)",
+      "is_NA_enabled": "BOOLEAN",
+      "is_repeatable": "BOOLEAN",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "team_id": "UUID",
+      "priority": "INTEGER"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  
+  "sourcing_application": {
+    "description":"Links candidates to job postings, storing application details like timestamps, statuses, JSONB form responses, rejection reasons, and assigned recruiters. Manages the application lifecycle, tracks candidate progress, and supports recruitment evaluation and advancement.",
+    "columns": {
+      "id": "INTEGER",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "candidate_id": "UUID",
+      "job_id": "UUID",
+      "status_id": "INTEGER",
+      "application_form_response": "JSONB",
+      "reject_reason": "VARCHAR(128)",
+      "tracking_id": "VARCHAR(10)",
+      "other_fields": "JSONB",
+      "verified": "BOOLEAN",
+      "offer_decline_reason": "VARCHAR(128)",
+      "custom_candidate_fields_response": "JSONB",
+      "candidate_preferred_locations": "VARCHAR(800)",
+      "ats_id": "VARCHAR(64)",
+      "is_sent_to_hrms": "BOOLEAN",
+      "assigned_recruiter_id": "UUID",
+      "score": "DOUBLE PRECISION"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "assigned_recruiter_id",
+        "references": {
+          "table": "sourcing_hiringteammember",
+          "column": "id"
+        }
+      },
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "status_id",
+        "references": {
+          "table": "sourcing_applicationstatus",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_applicationcategory": {
+    "description":"Categorizes applications with titles and priority levels, enabling structured grouping and prioritization. Supports recruitment organization, application management, and trend analysis for streamlined workflows and reporting.",
+    "columns": {
+      "id": "INTEGER",
+      "title": "VARCHAR(128)",
+      "priority": "INTEGER"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": []
+  },
+  "sourcing_applicationstagemovement": {
+    "description":"Tracks application stage transitions with timestamps, source and destination stages, and involved team members, linking to applications and statuses. Monitors candidate pipeline progress, ensures hiring process transparency, and supports recruitment stage management.",
+    "columns": {
+      "id": "INTEGER",
+      "created_at": "TIMESTAMP",
+      "application_id": "INTEGER",
+      "destination_stage_id": "INTEGER",
+      "source_stage_id": "INTEGER",
+      "team_member_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "application_id",
+        "references": {
+          "table": "sourcing_application",
+          "column": "id"
+        }
+      },
+      {
+        "column": "destination_stage_id",
+        "references": {
+          "table": "sourcing_applicationstatus",
+          "column": "id"
+        }
+      },
+      {
+        "column": "source_stage_id",
+        "references": {
+          "table": "sourcing_applicationstatus",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_member_id",
+        "references": {
+          "table": "param_auth_teammember",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_applicationstatus": {
+    "description":"Defines application statuses with titles, stages, and category links, tracking creation and modification timestamps. Standardizes candidate progress tracking, supports consistent recruitment evaluation, and enables status updates and reporting.",
+    "columns": {
+      "id": "INTEGER",
+      "title": "VARCHAR(128)",
+      "stage": "VARCHAR(128)",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "category_id": "INTEGER"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "category_id",
+        "references": {
+          "table": "sourcing_applicationcategory",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_candidate": {
+    "description":"Maintains candidate profiles with names, emails, resumes, experience, locations, and JSONB tags, linked to sources, teams, and resume storage. Centralizes data for sourcing, screening, and tracking candidate qualifications throughout recruitment.",
+    "columns": {
+      "id": "UUID",
+      "ats_id": "VARCHAR(64)",
+      "is_prospect": "BOOLEAN",
+      "is_archived": "INTEGER",
+      "full_name": "VARCHAR(256)",
+      "email_id": "VARCHAR(64)",
+      "resume_file_name": "VARCHAR(256)",
+      "remote_resume_url": "VARCHAR(2083)",
+      "other_fields": "JSONB",
+      "uploader_email": "VARCHAR(64)",
+      "ats_modified_date": "TIMESTAMP",
+      "genderize_dump": "JSONB",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "resume_id": "UUID",
+      "source_id": "INTEGER",
+      "team_id": "UUID",
+      "experience": "INTEGER",
+      "location": "VARCHAR(128)",
+      "is_blacklisted": "BOOLEAN",
+      "date_of_birth": "DATE",
+      "phone_number": "VARCHAR(32)",
+      "tags": "JSONB"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "resume_id",
+        "references": {
+          "table": "sourcing_resume",
+          "column": "id"
+        }
+      },
+      {
+        "column": "source_id",
+        "references": {
+          "table": "sourcing_candidatesourcetype",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_candidatesourcetype": {
+    "description":"Categorizes candidate sources with types, categories, and team links, defining recruitment origins. Tracks sourcing effectiveness, optimizes outreach channels, and supports analysis of candidate recruitment sources.",
+    "columns": {
+      "id": "INTEGER",
+      "source_type": "VARCHAR(128)",
+      "category": "VARCHAR(64)",
+      "team_id": "UUID",
+      "category_title": "VARCHAR(128)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_city": {
+    "description":"Stores city details with locality names, city names, and autocomplete flags, tracking creation and modification. Enables location-based job and candidate filtering, matching opportunities to preferences, and enhances recruitment search capabilities.",
+    "columns": {
+      "id": "INTEGER",
+      "locality": "VARCHAR(1000)",
+      "city_name": "VARCHAR(63)",
+      "autocomplete": "BOOLEAN",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": []
+  },
+  "sourcing_hiringteammember": {
+    "description":"Assigns team members to jobs with roles, user IDs, and locations, linking to jobs and users. Defines hiring team responsibilities, fosters recruitment collaboration, and manages oversight of job postings and candidate evaluations.",
+    "columns": {
+      "id": "UUID",
+      "role": "VARCHAR(40)",
+      "job_id": "UUID",
+      "user_id": "INTEGER",
+      "location": "VARCHAR(40)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "user_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_job": {
+    "description":"Manages job postings with titles, JSONB descriptions, statuses, experience, and locations, linked to teams, categories, and form templates. Supports job creation, tracking, and publication, driving recruitment from posting to closure.",
+    "columns": {
+      "id": "UUID",
+      "ats_id": "VARCHAR(64)",
+      "title": "VARCHAR(128)",
+      "description": "TEXT",
+      "parsed_jd": "JSONB",
+      "parsing_status": "INTEGER",
+      "other_fields": "JSONB",
+      "status": "VARCHAR(16)",
+      "uploader_email": "VARCHAR(64)",
+      "referrals": "BOOLEAN",
+      "slug": "VARCHAR(192)",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "category_id": "UUID",
+      "team_id": "UUID",
+      "valid_application_stages": "JSONB",
+      "business_unit_id": "UUID",
+      "custom_application_form": "JSONB",
+      "req_id": "INTEGER",
+      "hiring_type": "VARCHAR(30)",
+      "formatted_jd": "JSONB",
+      "job_type": "INTEGER",
+      "locations": "JSONB",
+      "max_experience": "INTEGER",
+      "min_experience": "INTEGER",
+      "custom_job_fields": "JSONB",
+      "ijp": "BOOLEAN",
+      "ijp_description": "VARCHAR(150)",
+      "referral_description": "VARCHAR(150)",
+      "location_wise_hiring_team": "BOOLEAN",
+      "location_wise_openings": "JSONB",
+      "is_confidential": "BOOLEAN",
+      "is_hiring_event": "BOOLEAN",
+      "is_auto_prescreening_enabled": "BOOLEAN",
+      "employee_application_form": "JSONB",
+      "application_form_template_id": "UUID",
+      "job_close_reason": "VARCHAR(512)",
+      "has_diversity": "BOOLEAN",
+      "is_remote": "BOOLEAN",
+      "published_on_career_page": "TIMESTAMP"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "application_form_template_id",
+        "references": {
+          "table": "param_forms_formtemplate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "business_unit_id",
+        "references": {
+          "table": "param_auth_businessunit",
+          "column": "id"
+        }
+      },
+      {
+        "column": "category_id",
+        "references": {
+          "table": "sourcing_jobcategory",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_jobactivitylog": {
+    "description":"Logs job activities with types, actions, and metadata, linking to jobs and users. Maintains a recruitment audit trail, ensures transparency, and tracks job-related changes for monitoring.",
+    "columns": {
+      "id": "UUID",
+      "type": "VARCHAR(40)",
+      "activity": "VARCHAR(40)",
+      "meta": "VARCHAR(100)",
+      "created_at": "TIMESTAMP",
+      "job_id": "UUID",
+      "user_id": "INTEGER"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "user_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_jobcategory": {
+    "description":"Categorizes jobs with names and ERP codes, linked to teams for clarity. Groups jobs by type or function, simplifies recruitment searches and reporting, and aids in filtering opportunities for candidates and HR.",
+    "columns": {
+      "id": "UUID",
+      "category": "VARCHAR(64)",
+      "team_id": "UUID",
+      "erp_code": "VARCHAR(128)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_jobreviewers": {
+    "description":"Tracks job application reviewers with order, status, and comments, linking to jobs, team members, and inviters. Manages the review process, ensures structured feedback, and coordinates evaluations and approvals in recruitment.",
+    "columns": {
+      "id": "UUID",
+      "order": "INTEGER",
+      "status": "VARCHAR(15)",
+      "comment": "VARCHAR(1024)",
+      "created_at": "TIMESTAMP",
+      "updated_at": "TIMESTAMP",
+      "invited_by_id": "INTEGER",
+      "job_id": "UUID",
+      "member_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "member_id",
+        "references": {
+          "table": "param_auth_teammember",
+          "column": "id"
+        }
+      },
+      {
+        "column": "invited_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_location": {
+    "description":"Stores job location data with unique IDs and names for geographical categorization. Associates jobs with places, supports location-based recruitment searches, and aligns opportunities with candidate or organizational needs.",
+    "columns": {
+      "location_id": "UUID",
+      "location": "VARCHAR(255)"
+    },
+    "primary_keys": [
+      "location_id"
+    ],
+    "foreign_keys": []
+  },
+  "sourcing_prescreeningdata": {
+    "description":"Stores prescreening data with statuses, timestamps, scores, and JSONB inferences, linking to candidates and jobs. Facilitates early candidate evaluation, streamlines screening processes, and supports recruitment filtering before interviews.",
+    "columns": {
+      "id": "UUID",
+      "status": "VARCHAR(20)",
+      "started_at": "TIMESTAMP",
+      "completed_at": "TIMESTAMP",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "candidate_id": "UUID",
+      "job_id": "UUID",
+      "prescreening_template_id": "UUID",
+      "inferences": "JSONB",
+      "initiated_by_id": "INTEGER",
+      "score": "DOUBLE PRECISION",
+      "prescreening_url": "VARCHAR(1500)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "initiated_by_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      },
+      {
+        "column": "prescreening_template_id",
+        "references": {
+          "table": "sourcing_prescreeningtemplate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_recruiter": {
+    "description":"Stores recruiter profiles with names, emails, and timestamps, identified by IDs and ATS references. Manages recruiter identities, enables candidate communication, and supports assignment and tracking of recruitment responsibilities.",
+    "columns": {
+      "id": "UUID",
+      "ats_id": "VARCHAR(64)",
+      "name": "VARCHAR(128)",
+      "email": "VARCHAR(64)",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": []
+  },
+  "sourcing_recruiter_jobs": {
+    "description":"Connects recruiters to jobs with IDs, ensuring clear accountability. Tracks recruiter workloads, manages job assignments, and supports efficient recruitment oversight for specific postings.",
+    "columns": {
+      "id": "INTEGER",
+      "recruiter_id": "UUID",
+      "job_id": "UUID"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "recruiter_id",
+        "references": {
+          "table": "sourcing_recruiter",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_recruiternotes": {
+    "description":"Stores recruiter notes with text, privacy flags, and edit tracking, linking to candidates, jobs, and recruiters. Documents observations, supports candidate evaluation, and enhances recruitment collaboration.",
+    "columns": {
+      "id": "UUID",
+      "note": "TEXT",
+      "is_edited": "BOOLEAN",
+      "is_active": "BOOLEAN",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "candidate_id": "UUID",
+      "job_id": "UUID",
+      "recruiter_id": "INTEGER",
+      "is_private": "BOOLEAN"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "job_id",
+        "references": {
+          "table": "sourcing_job",
+          "column": "id"
+        }
+      },
+      {
+        "column": "recruiter_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_recruiternotes_mentions": {
+    "description":"Tracks user mentions in recruiter notes, linking to notes and users. Enhances team communication, ensures awareness, and facilitates coordination in recruitment processes.",
+    "columns": {
+      "id": "INTEGER",
+      "recruiternotes_id": "UUID",
+      "user_id": "INTEGER"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "recruiternotes_id",
+        "references": {
+          "table": "sourcing_recruiternotes",
+          "column": "id"
+        }
+      },
+      {
+        "column": "user_id",
+        "references": {
+          "table": "auth_user",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_referrals": {
+    "description":"Manages candidate referrals with emails, types, and relationships, linked to candidates and teams. Drives referral programs, incentivizes participation, and tracks recommended candidates in recruitment.",
+    "columns": {
+      "id": "INTEGER",
+      "referral_email_id": "VARCHAR(64)",
+      "referral_type": "VARCHAR(128)",
+      "candidate_id": "UUID",
+      "team_id": "UUID",
+      "created_at": "TIMESTAMP",
+      "referral_relationship": "VARCHAR(128)",
+      "candidate_active": "BOOLEAN"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "candidate_id",
+        "references": {
+          "table": "sourcing_candidate",
+          "column": "id"
+        }
+      },
+      {
+        "column": "team_id",
+        "references": {
+          "table": "param_auth_team",
+          "column": "id"
+        }
+      }
+    ]
+  },
+  "sourcing_resume": {
+    "description":"Stores resumes with file paths, JSONB-parsed data, skills, and parsing status, tracking errors. Enables access to candidate qualifications, supports credential evaluation, and streamlines recruitment reviews.",
+    "columns": {
+      "id": "UUID",
+      "resume": "VARCHAR(256)",
+      "parsing_status": "INTEGER",
+      "parsed_resume": "JSONB",
+      "parsed_resume_vector": "TSVECTOR",
+      "created_at": "TIMESTAMP",
+      "modified_at": "TIMESTAMP",
+      "clean_resume": "JSONB",
+      "other_details": "JSONB",
+      "resume_skill_list": "JSONB",
+      "resume_skills": "JSONB",
+      "resume_text": "TEXT",
+      "parsing_errors": "TEXT"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": []
+  },
+  "sourcing_tag": {
+    "description":"Stores tags with titles, colors, and team member links for categorizing recruitment entities. Organizes and filters data, simplifies searches, and enhances tagging of profiles or jobs in recruitment.",
+    "columns": {
+      "id": "INTEGER",
+      "title": "VARCHAR(40)",
+      "team_member_id": "UUID",
+      "color_theme": "VARCHAR(40)"
+    },
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [
+      {
+        "column": "team_member_id",
+        "references": {
+          "table": "param_auth_teammember",
+          "column": "id"
+        }
+      }
+    ]
+  }
+}

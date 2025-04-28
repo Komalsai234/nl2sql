@@ -1,0 +1,637 @@
+{
+    "auth_user": {
+      
+      "description":"This table manages user accounts within the HR application, storing essential details like usernames, passwords, email addresses, and access roles such as superuser or staff status, along with timestamps for login and account creation. It is crucial for authenticating and authorizing users, ensuring secure access to recruitment tools and data, and is widely used across the system wherever user identity or permissions are required, such as assigning recruiters or tracking actions by team members.",
+      
+      "columns": {
+        "id": "INTEGER",
+        "password": "VARCHAR(128)",
+        "last_login": "TIMESTAMP",
+        "is_superuser": "BOOLEAN",
+        "username": "VARCHAR(150)",
+        "first_name": "VARCHAR(30)",
+        "last_name": "VARCHAR(30)",
+        "email": "VARCHAR(254)",
+        "is_staff": "BOOLEAN",
+        "is_active": "BOOLEAN",
+        "date_joined": "TIMESTAMP"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    
+    "employee_employee": {
+      "description":"This table holds comprehensive employee profiles, including unique identifiers, employee IDs, locations, designations, departments, and reporting structures linked to business units and team members, with additional JSON fields for flexibility and resume storage. It is vital for maintaining an organized view of the workforce, supporting HR operations like onboarding, team management, and organizational reporting, and is particularly useful in tracking employee details and their integration into recruitment processes.",
+      "columns": {
+        "id": "UUID",
+        "employee_id": "VARCHAR(30)",
+        "location": "VARCHAR(128)",
+        "preferred_locations": "VARCHAR(128)",
+        "designation": "VARCHAR(128)",
+        "department": "VARCHAR(128)",
+        "other_fields": "JSONB",
+        "modified_at": "TIMESTAMP",
+        "created_at": "TIMESTAMP",
+        "business_unit_id": "UUID",
+        "reporting_manager_id": "UUID",
+        "team_member_id": "UUID",
+        "mail_subscription": "JSONB",
+        "resume": "VARCHAR(256)"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "business_unit_id",
+          "references": {
+            "table": "param_auth_businessunit",
+            "column": "id"
+          }
+        },
+        {
+          "column": "reporting_manager_id",
+          "references": {
+            "table": "param_auth_teammember",
+            "column": "id"
+          }
+        },
+        {
+          "column": "team_member_id",
+          "references": {
+            "table": "param_auth_teammember",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "interview_kit_interviewsession": {
+      "description":"This table organizes interview sessions by capturing start and end times, locations, recruiter notes, interviewer feedback in JSON format, and links to candidates, jobs, and team members, along with details like cancellation status and notification timestamps. It is essential for scheduling and tracking interviews, ensuring smooth coordination between candidates and interviewers, and is used in the recruitment pipeline to monitor candidate progress and collect feedback during hiring.",
+      "columns": {
+        "id": "UUID",
+        "start_time": "TIMESTAMP",
+        "end_time": "TIMESTAMP",
+        "recruiter_notes": "TEXT",
+        "interview_location": "VARCHAR(512)",
+        "interviewer_feedback": "JSONB",
+        "created_at": "TIMESTAMP",
+        "modified_at": "TIMESTAMP",
+        "application_stage_id": "INTEGER",
+        "candidate_id": "UUID",
+        "created_by_id": "INTEGER",
+        "interviewer_id": "INTEGER",
+        "job_id": "UUID",
+        "team_id": "UUID",
+        "candidate_timezone": "VARCHAR(64)",
+        "event_id": "VARCHAR(44)",
+        "is_cancelled": "BOOLEAN",
+        "interviewer_confirmation": "JSONB",
+        "other_fields": "JSONB",
+        "stage": "VARCHAR(20)",
+        "candidate_notified_at": "TIMESTAMP",
+        "is_candidate_notified": "BOOLEAN",
+        "interview_url": "TEXT",
+        "interview_url_type": "VARCHAR(30)",
+        "is_quick_interview": "BOOLEAN"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "application_stage_id",
+          "references": {
+            "table": "sourcing_applicationstatus",
+            "column": "id"
+          }
+        },
+        {
+          "column": "candidate_id",
+          "references": {
+            "table": "sourcing_candidate",
+            "column": "id"
+          }
+        },
+        {
+          "column": "created_by_id",
+          "references": {
+            "table": "auth_user",
+            "column": "id"
+          }
+        },
+        {
+          "column": "interviewer_id",
+          "references": {
+            "table": "auth_user",
+            "column": "id"
+          }
+        },
+        {
+          "column": "job_id",
+          "references": {
+            "table": "sourcing_job",
+            "column": "id"
+          }
+        },
+        {
+          "column": "team_id",
+          "references": {
+            "table": "param_auth_team",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "offer_manager_offermasterdata": {
+      "description":"This table stores job offer details in a flexible JSON format, connecting offers to specific candidates and job postings via their unique identifiers. It is critical for managing the offer process, allowing HR teams to track and customize offer data efficiently, and is applied in the final stages of recruitment to formalize candidate selections and maintain offer records.",
+      "columns": {
+        "id": "UUID",
+        "data_json": "JSONB",
+        "candidate_id": "UUID",
+        "job_id": "UUID"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "candidate_id",
+          "references": {
+            "table": "sourcing_candidate",
+            "column": "id"
+          }
+        },
+        {
+          "column": "job_id",
+          "references": {
+            "table": "sourcing_job",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_application": {
+      "description":"This table links candidates to job postings, recording application details like creation timestamps, status, form responses in JSON, rejection reasons, and assigned recruiters, with additional fields for tracking and verification. It is key for managing the application lifecycle, enabling recruiters to monitor candidate submissions and progress, and is used throughout the hiring process to evaluate and advance applicants.",
+      "columns": {
+        "id": "INTEGER",
+        "created_at": "TIMESTAMP",
+        "modified_at": "TIMESTAMP",
+        "candidate_id": "UUID",
+        "job_id": "UUID",
+        "status_id": "INTEGER",
+        "application_form_response": "JSONB",
+        "reject_reason": "VARCHAR(128)",
+        "tracking_id": "VARCHAR(10)",
+        "other_fields": "JSONB",
+        "verified": "BOOLEAN",
+        "offer_decline_reason": "VARCHAR(128)",
+        "custom_candidate_fields_response": "JSONB",
+        "candidate_preferred_locations": "VARCHAR(800)",
+        "ats_id": "VARCHAR(64)",
+        "is_sent_to_hrms": "BOOLEAN",
+        "assigned_recruiter_id": "UUID",
+        "score": "DOUBLE PRECISION"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assigned_recruiter_id",
+          "references": {
+            "table": "sourcing_hiringteammember",
+            "column": "id"
+          }
+        },
+        {
+          "column": "candidate_id",
+          "references": {
+            "table": "sourcing_candidate",
+            "column": "id"
+          }
+        },
+        {
+          "column": "job_id",
+          "references": {
+            "table": "sourcing_job",
+            "column": "id"
+          }
+        },
+        {
+          "column": "status_id",
+          "references": {
+            "table": "sourcing_applicationstatus",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_applicationcategory": {
+      "description":"This table categorizes applications with titles and priority levels, providing a simple structure for grouping application types. It is useful for organizing and prioritizing applications, aiding in reporting and analysis, and is applied in recruitment workflows to streamline application management and assess trends.",
+      "columns": {
+        "id": "INTEGER",
+        "title": "VARCHAR(128)",
+        "priority": "INTEGER"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "sourcing_applicationstagemovement": {
+      "description":"This table tracks the movement of applications between stages, logging timestamps, source and destination stages, and the team members involved, with references to application and status tables. It is invaluable for monitoring application progress, ensuring transparency in the hiring process, and is used by recruiters to manage candidate pipelines and stage transitions.",
+      "columns": {
+        "id": "INTEGER",
+        "created_at": "TIMESTAMP",
+        "application_id": "INTEGER",
+        "destination_stage_id": "INTEGER",
+        "source_stage_id": "INTEGER",
+        "team_member_id": "UUID"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "application_id",
+          "references": {
+            "table": "sourcing_application",
+            "column": "id"
+          }
+        },
+        {
+          "column": "destination_stage_id",
+          "references": {
+            "table": "sourcing_applicationstatus",
+            "column": "id"
+          }
+        },
+        {
+          "column": "source_stage_id",
+          "references": {
+            "table": "sourcing_applicationstatus",
+            "column": "id"
+          }
+        },
+        {
+          "column": "team_member_id",
+          "references": {
+            "table": "param_auth_teammember",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_applicationstatus": {
+      "description":"This table defines application statuses with titles, stages, and categories, linked to timestamps and application categories for structured tracking. It is essential for standardizing and categorizing application progress, supporting consistent evaluation, and is used across recruitment to update and report on candidate statuses.",
+      "columns": {
+        "id": "INTEGER",
+        "title": "VARCHAR(128)",
+        "stage": "VARCHAR(128)",
+        "created_at": "TIMESTAMP",
+        "modified_at": "TIMESTAMP",
+        "category_id": "INTEGER"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "category_id",
+          "references": {
+            "table": "sourcing_applicationcategory",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_candidate": {
+      "description":"This table maintains candidate profiles with details like full names, emails, resumes, experience, locations, and tags in JSON, connected to sources, teams, and resume storage. It is critical for centralizing candidate data, enabling recruiters to assess qualifications and history, and is used in sourcing, screening, and tracking candidates throughout recruitment.",
+      "columns": {
+        "id": "UUID",
+        "ats_id": "VARCHAR(64)",
+        "is_prospect": "BOOLEAN",
+        "is_archived": "INTEGER",
+        "full_name": "VARCHAR(256)",
+        "email_id": "VARCHAR(64)",
+        "resume_file_name": "VARCHAR(256)",
+        "remote_resume_url": "VARCHAR(2083)",
+        "other_fields": "JSONB",
+        "uploader_email": "VARCHAR(64)",
+        "ats_modified_date": "TIMESTAMP",
+        "genderize_dump": "JSONB",
+        "created_at": "TIMESTAMP",
+        "modified_at": "TIMESTAMP",
+        "resume_id": "UUID",
+        "source_id": "INTEGER",
+        "team_id": "UUID",
+        "experience": "INTEGER",
+        "location": "VARCHAR(128)",
+        "is_blacklisted": "BOOLEAN",
+        "date_of_birth": "DATE",
+        "phone_number": "VARCHAR(32)",
+        "tags": "JSONB"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "resume_id",
+          "references": {
+            "table": "sourcing_resume",
+            "column": "id"
+          }
+        },
+        {
+          "column": "source_id",
+          "references": {
+            "table": "sourcing_candidatesourcetype",
+            "column": "id"
+          }
+        },
+        {
+          "column": "team_id",
+          "references": {
+            "table": "param_auth_team",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_city": {
+      "description":"This table stores city information with locality names, city names, and autocomplete flags, along with creation and modification timestamps. It is useful for location-based filtering of jobs and candidates, enhancing search capabilities, and is applied in recruitment to match opportunities with candidate preferences or job locations.",
+      "columns": {
+        "id": "INTEGER",
+        "locality": "VARCHAR(1000)",
+        "city_name": "VARCHAR(63)",
+        "autocomplete": "BOOLEAN",
+        "created_at": "TIMESTAMP",
+        "modified_at": "TIMESTAMP"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "sourcing_hiringteammember": {
+      "description":"This table assigns team members to jobs with roles, user IDs, and locations, linking to job and user tables for coordination. It is vital for defining hiring team responsibilities, ensuring collaboration in recruitment, and is used to manage who oversees specific job postings and candidate evaluations.",
+      "columns": {
+        "id": "UUID",
+        "role": "VARCHAR(40)",
+        "job_id": "UUID",
+        "user_id": "INTEGER",
+        "location": "VARCHAR(40)"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "job_id",
+          "references": {
+            "table": "sourcing_job",
+            "column": "id"
+          }
+        },
+        {
+          "column": "user_id",
+          "references": {
+            "table": "auth_user",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_job": {
+      "description":"This table represents job postings with titles, descriptions, statuses, experience requirements, and locations in JSON, linked to teams, categories, and form templates, with additional fields for referrals and confidentiality. It is the backbone of job management, allowing recruiters to create, track, and publish opportunities, and is used in every stage of recruitment from posting to closure.",
+      "columns": {
+        "id": "UUID",
+        "ats_id": "VARCHAR(64)",
+        "title": "VARCHAR(128)",
+        "description": "TEXT",
+        "parsed_jd": "JSONB",
+        "parsing_status": "INTEGER",
+        "other_fields": "JSONB",
+        "status": "VARCHAR(16)",
+        "uploader_email": "VARCHAR(64)",
+        "referrals": "BOOLEAN",
+        "slug": "VARCHAR(192)",
+        "created_at": "TIMESTAMP",
+        "modified_at": "TIMESTAMP",
+        "category_id": "UUID",
+        "team_id": "UUID",
+        "valid_application_stages": "JSONB",
+        "business_unit_id": "UUID",
+        "custom_application_form": "JSONB",
+        "req_id": "INTEGER",
+        "hiring_type": "VARCHAR(30)",
+        "formatted_jd": "JSONB",
+        "job_type": "INTEGER",
+        "locations": "JSONB",
+        "max_experience": "INTEGER",
+        "min_experience": "INTEGER",
+        "custom_job_fields": "JSONB",
+        "ijp": "BOOLEAN",
+        "ijp_description": "VARCHAR(150)",
+        "referral_description": "VARCHAR(150)",
+        "location_wise_hiring_team": "BOOLEAN",
+        "location_wise_openings": "JSONB",
+        "is_confidential": "BOOLEAN",
+        "is_hiring_event": "BOOLEAN",
+        "is_auto_prescreening_enabled": "BOOLEAN",
+        "employee_application_form": "JSONB",
+        "application_form_template_id": "UUID",
+        "job_close_reason": "VARCHAR(512)",
+        "has_diversity": "BOOLEAN",
+        "is_remote": "BOOLEAN",
+        "published_on_career_page": "TIMESTAMP"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "application_form_template_id",
+          "references": {
+            "table": "param_forms_formtemplate",
+            "column": "id"
+          }
+        },
+        {
+          "column": "business_unit_id",
+          "references": {
+            "table": "param_auth_businessunit",
+            "column": "id"
+          }
+        },
+        {
+          "column": "category_id",
+          "references": {
+            "table": "sourcing_jobcategory",
+            "column": "id"
+          }
+        },
+        {
+          "column": "team_id",
+          "references": {
+            "table": "param_auth_team",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_jobcategory": {
+      "description":"This table categorizes jobs with category names and ERP codes, tied to specific teams for organizational clarity. It is useful for grouping jobs by type or function, simplifying job searches and reporting, and is applied in recruitment to help candidates and HR filter opportunities effectively.",
+      "columns": {
+        "id": "UUID",
+        "category": "VARCHAR(64)",
+        "team_id": "UUID",
+        "erp_code": "VARCHAR(128)"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "team_id",
+          "references": {
+            "table": "param_auth_team",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_jobreviewers": {
+      "description":"This table tracks job application reviewers with their order, status, comments, and connections to jobs and team members, including who invited them. It is essential for managing the review process, ensuring structured feedback on applications, and is used in recruitment to coordinate evaluations and approvals.",
+      "columns": {
+        "id": "UUID",
+        "order": "INTEGER",
+        "status": "VARCHAR(15)",
+        "comment": "VARCHAR(1024)",
+        "created_at": "TIMESTAMP",
+        "updated_at": "TIMESTAMP",
+        "invited_by_id": "INTEGER",
+        "job_id": "UUID",
+        "member_id": "UUID"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "member_id",
+          "references": {
+            "table": "param_auth_teammember",
+            "column": "id"
+          }
+        },
+        {
+          "column": "invited_by_id",
+          "references": {
+            "table": "auth_user",
+            "column": "id"
+          }
+        },
+        {
+          "column": "job_id",
+          "references": {
+            "table": "sourcing_job",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_location": {
+      "description":"This table holds job location data with unique IDs and location names, providing a simple reference for geographical categorization. It is useful for associating jobs with specific places, aiding in location-based searches, and is applied in recruitment to align opportunities with candidate or organizational needs.",
+      "columns": {
+        "location_id": "UUID",
+        "location": "VARCHAR(255)"
+      },
+      "primary_keys": [
+        "location_id"
+      ],
+      "foreign_keys": []
+    },
+    "sourcing_recruiter": {
+      "description":"This table stores recruiter profiles with names, emails, and timestamps, identified by unique IDs and ATS references. It is key for managing recruiter identities and contact details, facilitating communication with candidates, and is used in recruitment to assign and track recruiter responsibilities.",
+      "columns": {
+        "id": "UUID",
+        "ats_id": "VARCHAR(64)",
+        "name": "VARCHAR(128)",
+        "email": "VARCHAR(64)",
+        "created_at": "TIMESTAMP",
+        "modified_at": "TIMESTAMP"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "sourcing_recruiter_jobs": {
+      "description":"This table connects recruiters to the jobs they manage, linking recruiter and job IDs for clear accountability. It is critical for tracking recruiter workloads and job assignments, ensuring efficient recruitment oversight, and is used to monitor which recruiters handle specific postings.",
+      "columns": {
+        "id": "INTEGER",
+        "recruiter_id": "UUID",
+        "job_id": "UUID"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "recruiter_id",
+          "references": {
+            "table": "sourcing_recruiter",
+            "column": "id"
+          }
+        },
+        {
+          "column": "job_id",
+          "references": {
+            "table": "sourcing_job",
+            "column": "id"
+          }
+        }
+      ]
+    },
+    "sourcing_recruiterfeedback": {
+      "description":"",
+      "columns": {
+        "id": "INTEGER",
+        "keyword": "TEXT",
+        "feedback": "INTEGER",
+        "candidate_id": "UUID",
+        "job_id": "UUID",
+        "recruiter_user_id": "INTEGER"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "candidate_id",
+          "references": {
+            "table": "sourcing_candidate",
+            "column": "id"
+          }
+        },
+        {
+          "column": "recruiter_user_id",
+          "references": {
+            "table": "auth_user",
+            "column": "id"
+          }
+        },
+        {
+          "column": "job_id",
+          "references": {
+            "table": "sourcing_job",
+            "column": "id"
+          }
+        }
+      ]
+    }
+  }

@@ -1,0 +1,7 @@
+sentence-transformers 
+faiss-cpu 
+openai 
+transformers
+psycopg2
+sqlglot
+SQLAlchemy
